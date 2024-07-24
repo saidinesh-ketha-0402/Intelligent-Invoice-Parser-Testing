@@ -1,0 +1,3 @@
+.env
+email_parser/credentials.json
+email_parser/token.json
