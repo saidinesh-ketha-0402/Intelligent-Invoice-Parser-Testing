@@ -1,0 +1,40 @@
+
+20
+
+
+********************************
+* McMaster-Carr Supply Company *
+********************************
+
+Invoice Fields
++----------------+-----------+------------+----------+-------------+----------------+---------------+------------------------------------------------------------------------+----------------------------------------------------------------------------------+--------------+----------+
+| invoice_number | po_number | issue_date | due_date | customer_id |  sales_person  | payment_terms |                         packaging_slip_number                          |                                 tracking_number                                  | total_amount | currency |
++----------------+-----------+------------+----------+-------------+----------------+---------------+------------------------------------------------------------------------+----------------------------------------------------------------------------------+--------------+----------+
+|    29077429    |   841829  |  6/24/24   |   None   |    985501   | Mary Kay Walsh | 2% 10, Net 30 | ['6583919-03', '6583919-01', '6583919-04', '6583919-05', '6583919-02'] | ['739795721565', '743679905969', '739795721576', '739795721587', '743679905970'] |   2699.62    |   USD    |
++----------------+-----------+------------+----------+-------------+----------------+---------------+------------------------------------------------------------------------+----------------------------------------------------------------------------------+--------------+----------+
+Address Fields
++------------------------+----------------------+--------------------------+
+|     remit_address      |   bill_to_address    |     ship_to_address      |
++------------------------+----------------------+--------------------------+
+|     McMaster-Carr      |     TRIMBLE INC      |       Trimble Inc        |
+|      PO Box 7690       | 5475 KELLENBURGER RD |      4450 Gibson Dr      |
+| Chicago, IL 60680-7690 |   DAYTON, OH 45424   | Tipp City, OH 45371-9461 |
+|                        |                      |                          |
++------------------------+----------------------+--------------------------+
+Product Fields
++-------------+------------------------------------------------------------------------------------------------------------+----------+------------+-------------+
+| part_number |                                            product_description                                             | quantity | unit_price | total_price |
++-------------+------------------------------------------------------------------------------------------------------------+----------+------------+-------------+
+|  91292A441  |             18-8 Stainless Steel Socket Head Screw, M6 x 1 mm Thread, 10 mm Long, Packs of 50              |    10    |    8.22    |     82.2    |
+|   7289A15   |                       Hex L-Key with Standard Tip, 4 mm Size, 2-7/8" Overall Length                        |   400    |    0.33    |    132.0    |
+|  92865A796  |  Medium-Strength Grade 5 Steel Hex Head Screw, Zinc-Plated, 5/8"-11 Thread Size, 1-1/4" Long, Packs of 10  |    20    |   10.65    |    213.0    |
+|  93475A280  |             18-8 Stainless Steel Washer for M10 Screw Size, 10.5 mm ID, 20 mm OD, Packs of 50              |    50    |   10.83    |    541.5    |
+|  92095A408  | Button Head Hex Drive Screw, Passivated 18-8 Stainless Steel, M10 x 1.50 mm Thread, 16mm Long, Packs of 10 |    50    |   11.27    |    563.5    |
+|  91280A652  | Medium-Strength Class 8.8 Steel Hex Head Screw, Zinc-Plated, M10 x 1.5 mm Thread, 75 mm Long, Packs of 10  |    30    |   11.11    |    333.3    |
+|  92865A837  |  Medium-Strength Grade 5 Steel Hex Head Screw, Zinc-Plated, 3/4"-10 Thread Size, 1-1/4" Long, Packs of 5   |    20    |   12.06    |    241.2    |
+|  91845A029  |                      18-8 Stainless Steel Hex Nut, 1/4"-20 Thread Size, Packs of 100                       |    10    |    5.34    |     53.4    |
+|  93475A230  |              18-8 Stainless Steel Washer for M4 Screw Size, 4.3 mm ID, 9 mm OD, Packs of 100               |    20    |    3.57    |     71.4    |
+|  98017A615  |   18-8 Stainless Steel Mil. Spec. Washer, Passivated, Number 6 Screw Size, NAS 1149-Cn632R, Packs of 500   |    4     |    24.9    |     99.6    |
+|  92240A714  |             18-8 Stainless Steel Hex Head Screw, 1/2"-13 Thread Size, 1-1/4" Long, Packs of 10             |    20    |    8.41    |    168.2    |
+|  90087A830  |   Rounded Head Thread-Cutting Screws for Metal, Zinc-Plated Steel, 10-32 Thread, 5/8" Long, Packs of 100   |    5     |   24.06    |    120.3    |
++-------------+------------------------------------------------------------------------------------------------------------+----------+------------+-------------+
