@@ -26,25 +26,36 @@ class Blob_Storage:
         blob_data = blob_client.download_blob()
         return blob_data.readall()
     
-    def extract_content_from_blob(self):
+    def extract_and_classify_blob(self):
         container_client = self.blob_service_client.get_container_client(self.container_name)
         blob_list = container_client.list_blobs()
+        
         for blob in blob_list:
             blob_name = blob.name
             blob_client = self.blob_service_client.get_blob_client(container=self.container_name, blob=blob_name)
             blob_data = blob_client.download_blob()
             file_data = blob_data.readall()
+            blob_extension = self.extractor.get_file_extension(blob_name)
             
-            if blob_name.endswith('.eml'):
+            if blob_extension.lower() == '.eml':
                 print(f"Attachment {blob_name}:")
-                attachments_content = self.extractor.read_document(blob_name, file_data)
-                for content in attachments_content:
-                    isInvoice = self.classifier.invoice_classifier(attachments_content[content])
-                    print(f"{content} is Invoice: {isInvoice}")
+                attachments_content = self.extractor.read_eml(file_data)
+                for att_content in attachments_content:
+                    content_extension = self.extractor.get_file_extension(att_content)
+                    content, attachment_data = attachments_content[att_content]
+
+                    isInvoice = self.classifier.invoice_classifier(content)
+                    
+                    if "No" in isInvoice and content_extension.lower() == '.pdf':
+                        content = self.extractor.read_pdf_as_image_azureocr(attachment_data)
+                        isInvoice = self.classifier.invoice_classifier(content)
+
+                    print(f"{att_content} is Invoice: {isInvoice}") 
+                
                 print('\n')
             
-            elif blob_name.endswith('.pdf'):
-                content = self.extractor.read_document(blob_name, file_data)
+            elif blob_extension.lower() == '.pdf':
+                content = self.extractor.read_pdf_pdfPlumber(file_data)
                 isInvoice = self.classifier.invoice_classifier(content)
                 
                 if "No" in isInvoice:

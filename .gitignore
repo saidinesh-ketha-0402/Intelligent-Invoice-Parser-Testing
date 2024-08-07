@@ -1,4 +1,5 @@
 .env
-email_parser/credentials.json
-email_parser/token.json
+# email_parser/credentials.json
+# email_parser/token.json
+email_parser/.env
 Extraction Code/.env

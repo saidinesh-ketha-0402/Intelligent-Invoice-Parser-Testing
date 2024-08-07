@@ -133,7 +133,7 @@ def read_eml(file_path, output_dir='attachments/'):
         return ""
 
 # Example usage
-file_path = 'attachments/Positive Examples/images/Statement_1759_from_Green_Circuits_Inc.pdf.png'
+file_path = 'attachments/Positive Examples/pdfs/33377.pdf'
 content = read_document(file_path)
 print('Extracted Content:\n' , content)
 

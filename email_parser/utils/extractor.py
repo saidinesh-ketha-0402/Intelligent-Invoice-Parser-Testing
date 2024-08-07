@@ -1,14 +1,8 @@
 import os
 import io
-import PyPDF2
-import docx
-import mammoth
-import easyocr
 import email
 from email.parser import BytesParser
-import pymupdf
 import pdfplumber
-from openai import AzureOpenAI
 from dotenv import load_dotenv
 
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
@@ -21,11 +15,14 @@ class Extractor:
         load_dotenv()
         self.AZURE_OCR_KEY =  os.environ["VISION_KEY"]
         self.AZURE_OCR_ENDPOINT =  os.environ["VISION_ENDPOINT"]
-        self.container_name = os.environ["CONTAINER_NAME"]
 
 
-    def read_document(self, file_path, file_data):
+    def get_file_extension(self, file_path):
         _, file_extension = os.path.splitext(file_path)
+        return file_extension
+    
+    def read_document(self, file_path, file_data):
+        file_extension = self.get_file_extension(file_path)
         
         if file_extension.lower() == '.pdf' :
             return self.read_pdf_pdfPlumber(file_data)
@@ -71,6 +68,7 @@ class Extractor:
             print(f"Error reading Image: {e}")
             return ""
 
+
     def read_eml(self, file_data):  
         try:
             attachments_content = dict()
@@ -89,7 +87,7 @@ class Extractor:
                     attachment_data = part.get_payload(decode=True)
                     # Process the attachment content
                     content = self.read_document(file_name, attachment_data)
-                    attachments_content[file_name] = content
+                    attachments_content[file_name] = (content, attachment_data)
 
             return attachments_content
         
@@ -97,6 +95,7 @@ class Extractor:
             print(f"Error reading EML: {e}")
             return ""
     
+
     def read_pdf_as_image_azureocr(self, file_data, image_path='attachments/Positive Examples/images/sample.png'):
             print("Reading PDF as image using Azure OCR...")
             try:
