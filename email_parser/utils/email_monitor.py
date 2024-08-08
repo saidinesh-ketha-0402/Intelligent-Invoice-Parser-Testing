@@ -1,7 +1,7 @@
 import os.path
 import base64
 import json
-from dotenv import load_dotenv
+import dotenv
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -11,15 +11,17 @@ from utils.blob_storage import Blob_Storage
 class Monitor:
 
     def __init__(self):
-        load_dotenv()
+        dotenv.load_dotenv()
         self.SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
         self.storage = Blob_Storage()
         
 
     def authenticate_gmail(self):
         creds = None
+        token_json = os.environ['TOKEN']
+
         if os.path.exists('token.json'):
-            creds = Credentials.from_authorized_user_file('token.json', self.SCOPES)
+            creds = Credentials.from_authorized_user_info(json.loads(token_json), self.SCOPES)
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
@@ -28,8 +30,7 @@ class Monitor:
                 flow = InstalledAppFlow.from_client_config(
                     config, self.SCOPES)
                 creds = flow.run_local_server(port=0)
-            with open('token.json', 'w') as token:
-                token.write(creds.to_json())
+            dotenv.set_key('.env', "TOKEN", creds.to_json())
         return build('gmail', 'v1', credentials=creds)
 
 
@@ -57,7 +58,7 @@ class Monitor:
         # query = f'in:inbox has:attachment after:{five_minutes_ago} before:{now}'
         
         # Query if the polling interval is 1 day.
-        query = 'in:inbox has:attachment newer_than:3d -label:processed'
+        query = 'in:inbox has:attachment newer_than:4d -label:processed'
         results = service.users().messages().list(userId=user_id, q=query).execute()
         messages = results.get('messages', [])
         if not messages:

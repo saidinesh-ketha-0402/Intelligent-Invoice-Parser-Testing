@@ -26,6 +26,12 @@ class Blob_Storage:
         blob_data = blob_client.download_blob()
         return blob_data.readall()
     
+
+    def remove_blob(self, blob_service_client: BlobServiceClient, container_name: str, blob_name: str):
+        blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+        blob_client.delete_blob()
+    
+
     def extract_and_classify_blob(self):
         container_client = self.blob_service_client.get_container_client(self.container_name)
         blob_list = container_client.list_blobs()
@@ -46,9 +52,12 @@ class Blob_Storage:
 
                     isInvoice = self.classifier.invoice_classifier(content)
                     
-                    if "No" in isInvoice and content_extension.lower() == '.pdf':
-                        content = self.extractor.read_pdf_as_image_azureocr(attachment_data)
-                        isInvoice = self.classifier.invoice_classifier(content)
+                    # if "No" in isInvoice and content_extension.lower() == '.pdf':
+                    #     content = self.extractor.read_pdf_as_image_azureocr(attachment_data)
+                    #     isInvoice = self.classifier.invoice_classifier(content)
+                    
+                    # if "No" in isInvoice:
+                    #     self.remove_blob(self.blob_service_client, self.container_name, att_content)
 
                     print(f"{att_content} is Invoice: {isInvoice}") 
                 
@@ -58,15 +67,27 @@ class Blob_Storage:
                 content = self.extractor.read_pdf_pdfPlumber(file_data)
                 isInvoice = self.classifier.invoice_classifier(content)
                 
-                if "No" in isInvoice:
-                    content = self.extractor.read_pdf_as_image_azureocr(file_data)
-                    isInvoice = self.classifier.invoice_classifier(content)
+                # if "No" in isInvoice:
+                #     content = self.extractor.read_pdf_as_image_azureocr(file_data)
+                #     isInvoice = self.classifier.invoice_classifier(content)
+
+                #     if "No" in isInvoice:
+                #         self.remove_blob(self.blob_service_client, self.container_name, blob_name)
 
                 print(f"Attachment {blob_name} is Invoice ?: {isInvoice}")
 
             else:
-                content = self.extractor.read_document(blob_name, file_data)
+                # If using GPT-4o for image classification, then use the below 2 lines.
+                # image_url = self.extractor.image_to_data_url(blob_name, file_data)
+                # content = self.extractor.read_img_gpt_4o(image_url)
+
+                # If using Azure OCR for image classification, then use the below 2 lines.
+                content = self.extractor.read_img_azure_ocr(file_data)
                 isInvoice = self.classifier.invoice_classifier(content)
+
+                # if "No" in isInvoice:
+                #     self.remove_blob(self.blob_service_client, self.container_name, blob_name)
+
                 print(f"Attachment {blob_name} is Invoice ?: {isInvoice}")
         
         return
@@ -86,7 +107,7 @@ class Blob_Storage:
             print(f"The access tier of blob '{blob_name}' is '{access_tier}'.")
 
             # Change the access tier
-            new_tier = StandardBlobTier.HOT  # Options: Hot, Cool, Archive
+            new_tier = StandardBlobTier.COOL  # Options: Hot, Cool, Archive
             blob_client.set_standard_blob_tier(new_tier)
 
             print(f"The access tier of blob '{blob_name}' has been set to '{new_tier}'.\n")

@@ -1,9 +1,12 @@
 import os
 import io
 import email
+import base64
+from mimetypes import guess_type
 from email.parser import BytesParser
 import pdfplumber
 from dotenv import load_dotenv
+from openai import AzureOpenAI
 
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from msrest.authentication import CognitiveServicesCredentials
@@ -15,12 +18,33 @@ class Extractor:
         load_dotenv()
         self.AZURE_OCR_KEY =  os.environ["VISION_KEY"]
         self.AZURE_OCR_ENDPOINT =  os.environ["VISION_ENDPOINT"]
+        self.GPT_KEY = os.getenv('GPT_KEY')
+        self.GPT_ENDPOINT = os.getenv('GPT_ENDPOINT')
+        self.GPT_VERSION = os.getenv('GPT_VERSION')
+        self.GPT_DEPLOYMENT_NAME = os.getenv('GPT_DEPLOYMENT_NAME')
+
+        self.client = AzureOpenAI(
+            api_key = self.GPT_KEY,
+            api_version = self.GPT_VERSION,
+            azure_endpoint = self.GPT_ENDPOINT
+        )
 
 
     def get_file_extension(self, file_path):
         _, file_extension = os.path.splitext(file_path)
         return file_extension
     
+
+    def image_to_data_url(self, image_path, img_byte_arr):
+        mime_type, _ = guess_type(image_path)
+        if mime_type is None:
+            mime_type = 'application/octet-stream'
+
+        base64_encoded_data = base64.b64encode(img_byte_arr).decode('utf-8')
+
+        return f"data:{mime_type};base64,{base64_encoded_data}"
+    
+
     def read_document(self, file_path, file_data):
         file_extension = self.get_file_extension(file_path)
         
@@ -67,6 +91,45 @@ class Extractor:
         except Exception as e:
             print(f"Error reading Image: {e}")
             return ""
+    
+
+    def read_img_gpt_4o(self, image_url):
+        query = "Extract the text from the image."
+        response = self.client.chat.completions.create(
+                            model = os.getenv('GPT_DEPLOYMENT_NAME'),
+                            messages = [
+                                {
+                                    "role": "system",
+                                    "content": [
+                                        {
+                                        "type": "text",
+                                        "text": ''' You are an helpful AI assistant and your job is to extract the text in the image and provide it to the user. You can use the image to text conversion techniques to extract the text. Once you have extracted the text, you can provide it to the user. Just output the extracted text and nothing else.'''
+                                        }
+                                    ]
+                                },
+                                {
+                                    "role" : "user",
+                                    "content": [
+                                        {
+                                            "type": "text",
+                                            "text": f"{query}"
+                                        },
+                                        {
+                                            "type": "image_url",
+                                            "image_url": {
+                                                "url" : f"{image_url}"
+                                            }
+                                        }
+                                        
+                                    ]
+                                },
+                            ],
+                            max_tokens = 2000,
+                            temperature = 0,
+                            top_p = 1
+                        )
+
+        return response.choices[0].message.content
 
 
     def read_eml(self, file_data):  
@@ -112,3 +175,22 @@ class Extractor:
             except Exception as e:
                 print(f"Failed to extract text from PDF: {e}")
                 return ""
+    
+
+    def read_pdf_as_image_gpt(self, img_path, file_data):
+        print("Reading PDF as image using GPT...")
+        try:
+            content = ''
+            with pdfplumber.open(io.BytesIO(file_data)) as pdf:
+                for page in pdf.pages:
+                    image = page.to_image()
+                    img_byte_arr = io.BytesIO()
+                    image.original.save(img_byte_arr, format='PNG')
+                    img_byte_arr = img_byte_arr.getvalue()
+                    image_url = self.image_to_data_url(img_path, img_byte_arr)
+                    content += self.read_img_gpt_4o(image_url)
+            return content                    
+                
+        except Exception as e:
+            print(f"Failed to extract text from PDF: {e}")
+            return ""

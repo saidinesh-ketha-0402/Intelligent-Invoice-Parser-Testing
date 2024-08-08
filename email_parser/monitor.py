@@ -2,7 +2,7 @@ import os.path
 import base64
 import json
 import re
-from dotenv import load_dotenv
+import dotenv
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -11,12 +11,15 @@ from googleapiclient.discovery import build
 # If modifying these SCOPES, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-load_dotenv()
+dotenv.load_dotenv()
 
 def authenticate_gmail():
     creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    token_json = os.getenv('TOKEN')
+
+    if token_json:
+        # creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        creds = Credentials.from_authorized_user_info(json.loads(token_json), SCOPES)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -25,8 +28,11 @@ def authenticate_gmail():
             flow = InstalledAppFlow.from_client_config(
                 config, SCOPES)
             creds = flow.run_local_server(port=0)
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
+        # with open('token.json', 'w') as token:
+        #     token.write(creds.to_json())
+        dotenv.set_key('.env', "TOKEN", creds.to_json())
+
+  
     return build('gmail', 'v1', credentials=creds)
 
 
@@ -48,7 +54,7 @@ def get_label_ids():
 
 
 def search_emails_with_attachments(service, user_id='me'):
-    query = 'in:inbox has:attachment newer_than:3d'
+    query = 'in:inbox has:attachment newer_than:4d'
     results = service.users().messages().list(userId=user_id, q=query).execute()
     messages = results.get('messages', [])
     if not messages:

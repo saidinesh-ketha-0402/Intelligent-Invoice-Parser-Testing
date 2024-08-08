@@ -5,9 +5,6 @@ from utils.blob_storage import Blob_Storage
 import os
 
 email_monitor = Monitor()
-content_extractor = Extractor()
-content_classifier = Classifier()
-
 service = email_monitor.authenticate_gmail()
 messages = email_monitor.search_emails_with_attachments(service)
 
