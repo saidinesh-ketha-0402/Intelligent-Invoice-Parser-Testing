@@ -58,7 +58,7 @@ class Monitor:
         # query = f'in:inbox has:attachment after:{five_minutes_ago} before:{now}'
         
         # Query if the polling interval is 1 day.
-        query = 'in:inbox has:attachment newer_than:4d -label:processed'
+        query = 'in:inbox has:attachment newer_than:1d -label:processed'
         results = service.users().messages().list(userId=user_id, q=query).execute()
         messages = results.get('messages', [])
         if not messages:

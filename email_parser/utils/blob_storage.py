@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 from utils.extractor import Extractor
 from utils.classifier import Classifier
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, StandardBlobTier
-from adlfs import AzureBlobFileSystem
 
 class Blob_Storage:
 
