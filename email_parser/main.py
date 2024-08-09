@@ -1,10 +1,4 @@
 from utils.email_monitor import Monitor
-from utils.extractor import Extractor
-from utils.classifier import Classifier
-from utils.blob_storage import Blob_Storage
-from typing import List, Dict
-import os
-import requests
 from fastapi import FastAPI
 from pydantic import BaseModel
 
