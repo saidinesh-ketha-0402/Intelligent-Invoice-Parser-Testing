@@ -1,4 +1,4 @@
-azure_storage==0.37.0
+azure-storage-blob==12.21.0
 easyocr==1.7.1
 fastapi==0.112.0
 fitz==0.0.1.dev2
