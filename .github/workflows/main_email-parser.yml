@@ -66,4 +66,4 @@ jobs:
         with:
           app-name: 'email-parser'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_31E2E8DF3C2C483589E5DAC301E4E0F7 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4F79728B506F4A809EC836678DAB29D4 }}
