@@ -57,7 +57,7 @@ def print_data(data_dict: dict, output_text):
         border = '*' * (len(data.get("vendor_name")[0]) + 4)
         print("\n\n")
         print(border)
-        print(f"* {data.get("vendor_name")[0]} *")
+        print(f"* {data.get('vendor_name')[0]} *")
         print(border)
 
         with open(output_text, 'a') as file:
