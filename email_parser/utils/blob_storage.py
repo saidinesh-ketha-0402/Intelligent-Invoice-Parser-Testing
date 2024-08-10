@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from utils.extractor import Extractor
 from utils.classifier import Classifier
+from utils.mongoDB import Invoice_Status_DB
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, StandardBlobTier
 
 class Blob_Storage:
@@ -13,10 +14,12 @@ class Blob_Storage:
         self.container_name = os.environ["CONTAINER_NAME"]
         self.extractor = Extractor()
         self.classifier = Classifier()
+        self.invoice_status_db = Invoice_Status_DB()
     
     def upload_to_blob(self, filename, file_data):
         blob_client = self.blob_service_client.get_blob_client(container=self.container_name, blob=filename)
         blob_client.upload_blob(file_data, overwrite=True)
+        self.invoice_status_db.create_document(filename, "Uploaded", self.container_name)
         print(f"Attachment {filename} uploaded to Azure Blob Storage.")
 
 
@@ -29,6 +32,7 @@ class Blob_Storage:
     def remove_blob(self, blob_service_client: BlobServiceClient, container_name: str, blob_name: str):
         blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
         blob_client.delete_blob()
+        self.invoice_status_db.delete_document(blob_name)
     
 
     def extract_and_classify_blob(self):
