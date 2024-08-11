@@ -20,7 +20,7 @@ class Monitor:
         creds = None
         token_json = os.environ['TOKEN']
 
-        if os.path.exists('token.json'):
+        if token_json:
             creds = Credentials.from_authorized_user_info(json.loads(token_json), self.SCOPES)
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:

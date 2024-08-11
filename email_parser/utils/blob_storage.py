@@ -23,8 +23,8 @@ class Blob_Storage:
         print(f"Attachment {filename} uploaded to Azure Blob Storage.")
 
 
-    def access_blob(self, filename):
-        blob_client = self.blob_service_client.get_blob_client(container=self.container_name, blob=filename)
+    def access_blob(self, container_name, filename):
+        blob_client = self.blob_service_client.get_blob_client(container=container_name, blob=filename)
         blob_data = blob_client.download_blob()
         return blob_data.readall()
     
@@ -36,14 +36,13 @@ class Blob_Storage:
     
 
     def extract_and_classify_blob(self):
-        container_client = self.blob_service_client.get_container_client(self.container_name)
-        blob_list = container_client.list_blobs()
-        
-        for blob in blob_list:
-            blob_name = blob.name
-            blob_client = self.blob_service_client.get_blob_client(container=self.container_name, blob=blob_name)
-            blob_data = blob_client.download_blob()
-            file_data = blob_data.readall()
+        doc_ids = self.invoice_status_db.get_documents_by_status("Uploaded")
+        for doc_id in doc_ids:
+            document = self.invoice_status_db.get_document_by_id(doc_id)
+            blob_name = document["blob_name"]
+            cont_name = document["container_name"]
+
+            file_data = self.access_blob(cont_name, blob_name)
             blob_extension = self.extractor.get_file_extension(blob_name)
             
             if blob_extension.lower() == '.eml':
@@ -61,6 +60,7 @@ class Blob_Storage:
                     
                     # if "No" in isInvoice:
                     #     self.remove_blob(self.blob_service_client, self.container_name, att_content)
+                    #     self.invoice_status_db.delete_document(doc_id)
 
                     print(f"{att_content} is Invoice: {isInvoice}") 
                 
@@ -76,6 +76,7 @@ class Blob_Storage:
 
                 #     if "No" in isInvoice:
                 #         self.remove_blob(self.blob_service_client, self.container_name, blob_name)
+                #         self.invoice_status_db.delete_document(doc_id)
 
                 print(f"Attachment {blob_name} is Invoice ?: {isInvoice}")
 
@@ -90,9 +91,10 @@ class Blob_Storage:
 
                 # if "No" in isInvoice:
                 #     self.remove_blob(self.blob_service_client, self.container_name, blob_name)
+                #     self.invoice_status_db.delete_document(doc_id)
 
                 print(f"Attachment {blob_name} is Invoice ?: {isInvoice}")
-        
+    
         return
 
 

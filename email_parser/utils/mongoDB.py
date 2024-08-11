@@ -13,6 +13,7 @@ class Invoice_Status_DB:
         self.db = self.client[self.DB_NAME]
         self.collection = self.db[self.COLLECTION_NAME]
     
+
     def create_document(self, blob_name, status, container_name):
         document = {
             "blob_name": blob_name,
@@ -20,20 +21,23 @@ class Invoice_Status_DB:
             "container_name": container_name
         }
         self.collection.insert_one(document)
-        print("Document inserted")
-
-
-    def read_document(self, blob_name):
-        document = self.collection.find_one({"blob_name": blob_name})
-        if document:
-            print("Document found:", document)
-        else:
-            print("Document not found")
+    
+    
+    def get_documents_by_status(self, status):
+        doc_ids = []
+        documents = self.collection.find({"status": status})
+        for document in documents:
+            doc_ids.append(document["_id"])
+        return doc_ids
+    
+    def get_document_by_id(self, id):
+        document = self.collection.find_one({"_id": id})
+        return document
 
     
-    def update_document(self, blob_name, new_status):
+    def update_document(self, id, new_status):
         result = self.collection.update_one(
-            {"blob_name": blob_name},
+            {"_id": id},
             {"$set": {"status": new_status}}
         )
         if result.modified_count > 0:
@@ -42,8 +46,8 @@ class Invoice_Status_DB:
             print("No document found to update")
 
     
-    def delete_document(self, blob_name):
-        result = self.collection.delete_one({"blob_name": blob_name})
+    def delete_document(self, id):
+        result = self.collection.delete_one({"_id": id})
         if result.deleted_count > 0:
             print("Document deleted")
         else:

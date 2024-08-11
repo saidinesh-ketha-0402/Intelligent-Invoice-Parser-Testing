@@ -1,56 +1,41 @@
+from typing import List
 from utils.email_monitor import Monitor
 from fastapi import FastAPI
 from pydantic import BaseModel
+import requests
 
-class Message(BaseModel):
-    id: str
+class MessageIds(BaseModel):
+    ids: List[str]
 
 app = FastAPI()
-# email_monitor = Monitor()
-# service = email_monitor.authenticate_gmail()
+email_monitor = Monitor()
+service = email_monitor.authenticate_gmail()
+
 
 @app.get("/")
 def read_root():
-    email_monitor = Monitor()
-    service = email_monitor.authenticate_gmail()
-    messages = get_emails(email_monitor, service)
-    download_attachments(messages, email_monitor, service)
-    extract_and_classify_blob(email_monitor)
+    messages = requests.post(f"http://127.0.0.1:8000/fetch_emails").json()
+    msg_ids = [msg['id'] for msg in messages]
+    requests.post(f"http://127.0.0.1:8000/download_attachments", json={"ids": msg_ids})
+    requests.post(f"http://127.0.0.1:8000/extract_and_classify_blob")
     return "This is a FAST API application for enabling the email parser to use other services."
 
 
-# def read_root():
-#     messages = requests.post("http://127.0.0.1:8000/fetch_emails").json()
-#     download_response = requests.post("http://127.0.0.1:8000/download_attachments", json=messages)
-#     return {
-#         "message": "This is a FAST API application for enabling my email parser to use other services.",
-#         "emails": messages,
-#         "download_status": download_response.json()
-#     }
-
-# @app.post("/fetch_emails")
-def get_emails(email_monitor, service):
+@app.post("/fetch_emails")
+def get_emails():
     messages = email_monitor.search_emails_with_attachments(service)
     return messages
 
-# @app.post("/download_attachments")
-# def download_attachments_endpoint(messages: List[Message]):
-#     result = download_attachments(messages)
-#     return {"status": result}
 
-def download_attachments(messages, email_monitor, service):
-    if messages:
-        for msg in messages:
-            email_monitor.download_attachments(service, 'me', msg['id'])
+@app.post("/download_attachments")
+def download_attachments(msg_ids: MessageIds):
+    if msg_ids:
+        for msg in msg_ids.ids:
+            email_monitor.download_attachments(service, 'me', msg)
     return "Attachments downloaded successfully."
 
-def extract_and_classify_blob(email_monitor):
+
+@app.post("/extract_and_classify_blob")
+def extract_and_classify_blob():
     email_monitor.storage.extract_and_classify_blob()
     return "Blob extracted and classified successfully."
-
-# if messages:
-#     for msg in messages:
-#         email_monitor.download_attachments(service, 'me', msg['id'])
-
-# blob_storage = Blob_Storage()
-# blob_storage.extract_and_classify_blob()
