@@ -24,17 +24,19 @@ async def read_root():
             return {"error": "Failed to fetch emails"}
         
         messages = fetch_response.json()
-        msg_ids = [msg['id'] for msg in messages]
         
-        # Download attachments
-        download_response = await client.post("http://127.0.0.1:8000/download_attachments", json={"ids": msg_ids})
-        if download_response.status_code != 200:
-            return {"error": "Failed to download attachments"}
-        
-        # Extract and classify blob
-        classify_response = await client.post("http://127.0.0.1:8000/extract_and_classify_blob")
-        if classify_response.status_code != 200:
-            return {"error": "Failed to extract and classify blob"}
+        if messages:
+            msg_ids = [msg['id'] for msg in messages]
+            
+            # Download attachments
+            download_response = await client.post("http://127.0.0.1:8000/download_attachments", json={"ids": msg_ids})
+            if download_response.status_code != 200:
+                return {"error": "Failed to download attachments"}
+            
+            # Extract and classify blob
+            classify_response = await client.post("http://127.0.0.1:8000/extract_and_classify_blob")
+            if classify_response.status_code != 200:
+                return {"error": "Failed to extract and classify blob"}
         
     return "This is a FAST API application for enabling the email parser to use other services."
 
